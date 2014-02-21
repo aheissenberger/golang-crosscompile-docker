@@ -1,9 +1,13 @@
 # Dockerfile for go (lastest release) cross compile
 #
 # docker build -t golang setup/
+# docker run --name golang --rm -v <src of boot2docker.go>:/srv golang /bin/sh -c "cd /srv;make"
+#
+# or if like to do it manual
 # docker run -i -t --name golang --rm -v <local dir>:/srv golang bash
 # root@xx:/# cd /srv
 # root@xx:/srv# make
+
  
 FROM ubuntu:13.10
 MAINTAINER Andreas Heissenberger <andreas@heissenberger.at> (@aheissenberger)
