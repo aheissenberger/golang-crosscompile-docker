@@ -1,4 +1,10 @@
-# Dockerfile for go 1.1.2 cross compile
+# Dockerfile for go (lastest release) cross compile
+#
+# docker build -t golang setup/
+# docker run -i -t --name golang-cross --rm -v <local dir>:/srv golang bash
+# root@b43906efeb3a:/# cd /srv; source /golang-crosscompile/crosscompile.bash 
+# root@b43906efeb3a:/srv# go-darwin-386 build -o boot2docker.exe boot2docker.go
+# maybe you need to activate cgo with export CGO_ENABLED=1
  
 FROM ubuntu
  
