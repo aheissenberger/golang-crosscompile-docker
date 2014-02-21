@@ -1,33 +1,21 @@
 # Dockerfile for go (lastest release) cross compile
 #
 # docker build -t golang setup/
-# docker run -i -t --name golang-cross --rm -v <local dir>:/srv golang bash
+# docker run -i -t --name golang --rm -v <local dir>:/srv golang bash
 # root@xx:/# cd /srv
-# root@xx:/srv# GOOS=darwin GOARCH=386 CGO_ENABLED=1 go build -o boot2docker.exe boot2docker.go
-# maybe you need to activate cgo with export CGO_ENABLED=1
+# root@xx:/srv# make
  
 FROM ubuntu:13.10
 MAINTAINER Andreas Heissenberger <andreas@heissenberger.at> (@aheissenberger)
 
 # Packaged dependencies
 RUN	apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -yq \
-	apt-utils \
-	aufs-tools \
 	automake \
-	btrfs-tools \
 	build-essential \
 	curl \
-	dpkg-sig \
+	ca-certificates \
 	git \
-	iptables \
-	libapparmor-dev \
-	libcap-dev \
-	libsqlite3-dev \
 	mercurial \
-	reprepro \
-	ruby1.9.1 \
-	ruby1.9.1-dev \
-	s3cmd=1.1.0* \
 	--no-install-recommends
 
 # Install Go
