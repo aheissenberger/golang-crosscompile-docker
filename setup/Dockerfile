@@ -2,27 +2,43 @@
 #
 # docker build -t golang setup/
 # docker run -i -t --name golang-cross --rm -v <local dir>:/srv golang bash
-# root@b43906efeb3a:/# cd /srv; source /golang-crosscompile/crosscompile.bash 
-# root@b43906efeb3a:/srv# go-darwin-386 build -o boot2docker.exe boot2docker.go
+# root@xx:/# cd /srv
+# root@xx:/srv# GOOS=darwin GOARCH=386 CGO_ENABLED=1 go build -o boot2docker.exe boot2docker.go
 # maybe you need to activate cgo with export CGO_ENABLED=1
  
-FROM ubuntu
- 
-RUN echo "deb http://archive.ubuntu.com/ubuntu precise main universe" > /etc/apt/sources.list
-RUN apt-get update
-RUN apt-get upgrade -y
- 
-RUN apt-get install -y mercurial git-core
- 
-RUN hg clone https://code.google.com/p/go
-# Maybe checkout the latest go release here
-ENV GOROOT /go
-ENV GOBIN /go/bin
- 
-RUN apt-get install -y gcc g++ make build-essential
+FROM ubuntu:13.10
+MAINTAINER Andreas Heissenberger <andreas@heissenberger.at> (@aheissenberger)
 
-RUN cd /go/src && ./all.bash || echo "a few tests would have needed more memory. build shoud be ok!"
-ENV PATH $PATH:/go/bin
-RUN /bin/bash -c "git clone git://github.com/davecheney/golang-crosscompile.git && source golang-crosscompile/crosscompile.bash && go-crosscompile-build-all"
+# Packaged dependencies
+RUN	apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -yq \
+	apt-utils \
+	aufs-tools \
+	automake \
+	btrfs-tools \
+	build-essential \
+	curl \
+	dpkg-sig \
+	git \
+	iptables \
+	libapparmor-dev \
+	libcap-dev \
+	libsqlite3-dev \
+	mercurial \
+	reprepro \
+	ruby1.9.1 \
+	ruby1.9.1-dev \
+	s3cmd=1.1.0* \
+	--no-install-recommends
+
+# Install Go
+RUN	curl -s https://go.googlecode.com/files/go1.2.src.tar.gz | tar -v -C /usr/local -xz
+ENV	PATH	/usr/local/go/bin:$PATH
+ENV	GOPATH	/go:/go/src/github.com/dotcloud/docker/vendor
+RUN	cd /usr/local/go/src && ./make.bash --no-clean 2>&1
+
+# Compile Go for cross compilation
+ENV	DOCKER_CROSSPLATFORMS	linux/386 linux/arm darwin/amd64 darwin/386
+# (set an explicit GOARM of 5 for maximum compatibility)
+ENV	GOARM	5
+RUN	cd /usr/local/go/src && bash -xc 'for platform in $DOCKER_CROSSPLATFORMS; do GOOS=${platform%/*} GOARCH=${platform##*/} ./make.bash --no-clean 2>&1; done'
  
-# Do some cool stuff here to have a container produce binaries for platforms
